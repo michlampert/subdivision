@@ -2,7 +2,10 @@
 
 ### [Michał Lampert](https://github.com/michlampert/) & [Wojciech Achtelik](https://github.com/WojtAcht/)
 
-| stats ||
+- [x] Doo–Sabin
+- [ ] Catmull–Clark
+
+| stats | |
 | --- | --- |
 | mesh after 0 subdivisions<br />vertices: 8<br />faces: 6<br />time to compute: 0 ms | <img src="photos/photo00_L00.png" alt="drawing" width="300"/> |
 | mesh after 1 subdivisions<br />vertices: 24<br />faces: 26<br />time to compute: 0.75674 ms | <img src="photos/photo00_L01.png" alt="drawing" width="300"/> |
