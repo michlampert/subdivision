@@ -5,6 +5,8 @@
 - [x] Doo–Sabin
 - [ ] Catmull–Clark
 
+![suzanne](suzanne.gif)
+
 | stats | |
 | --- | --- |
 | mesh after 0 subdivisions<br />vertices: 8<br />faces: 6<br />time to compute: 0 ms | <img src="photos/photo00_L00.png" alt="drawing" width="300"/> |
@@ -15,3 +17,9 @@
 | mesh after 5 subdivisions<br />vertices: 6144<br />faces: 6146<br />time to compute: 0.2 s | <img src="photos/photo00_L05.png" alt="drawing" width="300"/> |
 | mesh after 6 subdivisions<br />vertices: 24576<br />faces: 24578<br />time to compute: 1.25 s | <img src="photos/photo00_L06.png" alt="drawing" width="300"/> |
 | mesh after 7 subdivisions<br />vertices: 98304<br />faces: 98306<br />time to compute: 19.04 s | <img src="photos/photo00_L07.png" alt="drawing" width="300"/> |
+
+
+<!-- | file: dodecahedron<br />number of steps: 5<br />faces before: 20<br />faces after: 15362<br />time to compute: 0.74 s | file: icosahedron<br />number of steps: 5<br />faces before: 12<br />faces after: 15362<br />time to compute: 0.73 s | file: boxtorus<br />number of steps: 4<br />faces before: 32<br />faces after: 8192<br />time to compute: 0.27 s |
+|---|---|---|
+| <img src="photos/photo01_L03.png" alt="drawing" width="50%"/> | <img src="photos/photo01_L05.png" alt="drawing" width="50%"/> | <img src="photos/photo01_L01.png" alt="drawing" width="50%"/> |
+|  <img src="photos/photo01_L02.png" alt="drawing" width="50%"/> | <img src="photos/photo01_L04.png" alt="drawing" width="50%"/> | <img src="photos/photo01_L00.png" alt="drawing" width="50%"/> | -->
