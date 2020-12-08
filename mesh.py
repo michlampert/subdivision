@@ -182,7 +182,13 @@ if __name__ == "__main__":
     total_time = 0
     for i in range(8):
         mesh.save(f"meshes/mesh_subdivided_{i}_times.off")
-        # print(f"| mesh after {i} subdivisions<br />vertices: {len(mesh.vertices)}<br />faces: {len(mesh.faces)}<br />time to compute: {total_time} | ![photo](photo00_L0{i}.png) |")
+
+        if total_time < 0.001:
+            time_str = str(round(total_time * 1000, 5)) + " ms"
+        elif total_time < 0.1:
+            time_str = str(round(total_time * 1000, 2)) + " ms"
+        else: time_str = str(round(total_time, 2)) + " s"
+        print(f'| mesh after {i} subdivisions<br />vertices: {len(mesh.vertices)}<br />faces: {len(mesh.faces)}<br />time to compute: {time_str} | <img src="photos/photo00_L0{i}.png" alt="drawing" width="50%"/> |')
         
         if i == 7 : break
         t1 = time.time()
