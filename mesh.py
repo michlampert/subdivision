@@ -1,6 +1,7 @@
 import copy
 import random
 import itertools
+import time
 
 class Vertex:
     def __init__(self, x, y, z, faces = None, id = None):
@@ -43,6 +44,8 @@ class Vertex:
 class Face:
     def __init__(self, vertices = None):
         self.vertices = vertices if vertices else []
+        for v in self.vertices:
+            v.faces.append(self)
         self.center = Vertex(sum([v.x for v in self.vertices]), sum([v.y for v in self.vertices]), sum([v.z for v in self.vertices])) * (1/len(self.vertices))
         self.inside_points = {}
 
@@ -51,7 +54,7 @@ class Face:
     def neighbours(self):
         result = []
         for v1, v2 in zip(self.vertices, self.vertices[1:] + self.vertices[:1]):
-            tmp = set().union(v1.faces).intersection(v2.faces).difference(self)
+            tmp = set().union(v1.faces).intersection(v2.faces).difference([self])
             if tmp != set():
                 result.append(tmp.pop())
 
@@ -108,7 +111,7 @@ class Mesh:
                 
                 f = Face(list(map(lambda num: vertices[num], vs)))
                 self.faces.append(f)
-                for v in vs: vertices[v].faces.append(f)
+                # for v in vs: vertices[v].faces.append(f)
 
             self.vertices += vertices.values()
 
@@ -142,7 +145,7 @@ class Mesh:
         for face in old_faces:
             new_faces.append(Face(list(face.get_inside_points().values())))
             for v1, v2 in zip(face.vertices, face.vertices[1:] + face.vertices[:1]):
-                if (v1.id, v2.id) not in done_edges or (v2.id, v1.id) not in done_edges:
+                if (v1.id, v2.id) not in done_edges and (v2.id, v1.id) not in done_edges:
                     done_edges.add((v1.id, v2.id))
                     tmp = set().union(v1.faces).intersection(v2.faces).difference([face])
                     if tmp != set():
@@ -155,18 +158,35 @@ class Mesh:
                             ]))
         
         for vertice in old_vertices:
-            # vertice.repair_faces_order()
+            vertice.repair_faces_order()
             new_faces.append(Face([face.get_inside_points()[vertice] for face in vertice.faces]))
                     
 
         return Mesh(vertices=new_vertices, faces=new_faces)
-        
+
+    def save_faces_separately(self):
+        for i, face in enumerate(self.faces):
+            Mesh(vertices=self.vertices, faces=[face]).save(f"tmp/face{i}.off")
 
 
 
 if __name__ == "__main__":
-    mesh1 = Mesh(filename = "cube.off")
-    mesh2 = mesh1.subdivision()
-    mesh2.save("cube2.off")
+    # mesh1 = Mesh(filename = "cube.off")
+    # mesh2 = mesh1.subdivision()
+    # mesh2.save("cube2.off")
     # mesh3 = mesh2.subdivision()
     # mesh3.save("cube3.off")
+
+    mesh = Mesh(filename = "cube.off")
+
+    total_time = 0
+    for i in range(8):
+        mesh.save(f"meshes/mesh_subdivided_{i}_times.off")
+        # print(f"| mesh after {i} subdivisions<br />vertices: {len(mesh.vertices)}<br />faces: {len(mesh.faces)}<br />time to compute: {total_time} | ![photo](photo00_L0{i}.png) |")
+        
+        if i == 7 : break
+        t1 = time.time()
+        mesh = mesh.subdivision()
+        t2 = time.time()
+        total_time += t2-t1
+        
