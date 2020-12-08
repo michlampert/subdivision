@@ -2,8 +2,9 @@
 
 ### [Michał Lampert](https://github.com/michlampert/) & [Wojciech Achtelik](https://github.com/WojtAcht/)
 
-| mesh after 0 subdivisions<br />vertices: 8<br />faces: 6<br />time to compute: 0 ms | <img src="photos/photo00_L00.png" alt="drawing" width="50%"/> |
+| | |
 | --- | --- |
+| mesh after 0 subdivisions<br />vertices: 8<br />faces: 6<br />time to compute: 0 ms | <img src="photos/photo00_L00.png" alt="drawing" width="50%"/> |
 | mesh after 1 subdivisions<br />vertices: 24<br />faces: 26<br />time to compute: 0.75674 ms | <img src="photos/photo00_L01.png" alt="drawing" width="50%"/> |
 | mesh after 2 subdivisions<br />vertices: 96<br />faces: 98<br />time to compute: 3.03 ms | <img src="photos/photo00_L02.png" alt="drawing" width="50%"/> |
 | mesh after 3 subdivisions<br />vertices: 384<br />faces: 386<br />time to compute: 10.57 ms | <img src="photos/photo00_L03.png" alt="drawing" width="50%"/> |
