@@ -371,66 +371,75 @@ if __name__ == "__main__":
     # mesh.subdivision_LOOP().subdivision_LOOP().save("cube3.off")
     # mesh.subdivision_LOOP().subdivision_LOOP().subdivision_LOOP().save("cube4.off")
 
-    mesh_DS = Mesh(filename = "suzanne.off")
-    mesh_CC = Mesh(filename = "suzanne.off")
-    mesh_LOOP = Mesh(filename = "suzanne.off", triangular=True)
+    # mesh_DS = Mesh(filename = "suzanne.off")
+    # mesh_CC = Mesh(filename = "suzanne.off")
+    # mesh_LOOP = Mesh(filename = "suzanne.off", triangular=True)
 
-    DS_list = []
-    CC_list = []
-    LOOP_list = []
+    # DS_list = []
+    # CC_list = []
+    # LOOP_list = []
 
-    n = 6
+    # n = 6
 
-    total_time = 0
-    for i in range(n):
-        mesh_DS.save(f"cube_DS{i}.off")
+    # total_time = 0
+    # for i in range(n):
+    #     mesh_DS.save(f"cube_DS{i}.off")
 
-        if total_time < 0.001:
-            time_str = str(round(total_time * 1000, 5)) + " ms"
-        elif total_time < 0.1:
-            time_str = str(round(total_time * 1000, 2)) + " ms"
-        else: time_str = str(round(total_time, 2)) + " s"
-        DS_list.append(f'![img](photos/group_photo01_L{(str(i+n) if i+n>=10 else "0"+str(i+n))}.png) <br/> {len(mesh_DS.vertices)} \| {len(mesh_DS.faces)} \| {time_str}')
+    #     if total_time < 0.001:
+    #         time_str = str(round(total_time * 1000, 5)) + " ms"
+    #     elif total_time < 0.1:
+    #         time_str = str(round(total_time * 1000, 2)) + " ms"
+    #     else: time_str = str(round(total_time, 2)) + " s"
+    #     DS_list.append(f'![img](photos/group_photo01_L{(str(i+n) if i+n>=10 else "0"+str(i+n))}.png) <br/> {len(mesh_DS.vertices)} \| {len(mesh_DS.faces)} \| {time_str}')
         
-        if i == n-1 : break
-        t1 = time.time()
-        mesh_DS = mesh_DS.subdivision_DS()
-        t2 = time.time()
-        total_time += t2-t1
+    #     if i == n-1 : break
+    #     t1 = time.time()
+    #     mesh_DS = mesh_DS.subdivision_DS()
+    #     t2 = time.time()
+    #     total_time += t2-t1
 
-    total_time = 0
-    for i in range(n):
-        mesh_CC.save(f"cube_CC{i}.off")
+    # total_time = 0
+    # for i in range(n):
+    #     mesh_CC.save(f"cube_CC{i}.off")
 
-        if total_time < 0.001:
-            time_str = str(round(total_time * 1000, 5)) + " ms"
-        elif total_time < 0.1:
-            time_str = str(round(total_time * 1000, 2)) + " ms"
-        else: time_str = str(round(total_time, 2)) + " s"
-        CC_list.append(f'![img](photos/group_photo01_L{(str(i) if i>=10 else "0"+str(i))}.png) <br/> {len(mesh_CC.vertices)} \| {len(mesh_CC.faces)} \| {time_str}')
+    #     if total_time < 0.001:
+    #         time_str = str(round(total_time * 1000, 5)) + " ms"
+    #     elif total_time < 0.1:
+    #         time_str = str(round(total_time * 1000, 2)) + " ms"
+    #     else: time_str = str(round(total_time, 2)) + " s"
+    #     CC_list.append(f'![img](photos/group_photo01_L{(str(i) if i>=10 else "0"+str(i))}.png) <br/> {len(mesh_CC.vertices)} \| {len(mesh_CC.faces)} \| {time_str}')
         
-        if i == n-1 : break
-        t1 = time.time()
-        mesh_CC = mesh_CC.subdivision_CC()
-        t2 = time.time()
-        total_time += t2-t1
+    #     if i == n-1 : break
+    #     t1 = time.time()
+    #     mesh_CC = mesh_CC.subdivision_CC()
+    #     t2 = time.time()
+    #     total_time += t2-t1
 
-    total_time = 0
-    for i in range(n):
-        mesh_LOOP.save(f"cube_LOOP{i}.off")
+    # total_time = 0
+    # for i in range(n):
+    #     mesh_LOOP.save(f"cube_LOOP{i}.off")
 
-        if total_time < 0.001:
-            time_str = str(round(total_time * 1000, 5)) + " ms"
-        elif total_time < 0.1:
-            time_str = str(round(total_time * 1000, 2)) + " ms"
-        else: time_str = str(round(total_time, 2)) + " s"
-        LOOP_list.append(f'![img](photos/group_photo01_L{(str(i+n+n) if i+n+n>=10 else "0"+str(i+n+n))}.png) <br/> {len(mesh_LOOP.vertices)} \| {len(mesh_LOOP.faces)} \| {time_str}')
+    #     if total_time < 0.001:
+    #         time_str = str(round(total_time * 1000, 5)) + " ms"
+    #     elif total_time < 0.1:
+    #         time_str = str(round(total_time * 1000, 2)) + " ms"
+    #     else: time_str = str(round(total_time, 2)) + " s"
+    #     LOOP_list.append(f'![img](photos/group_photo01_L{(str(i+n+n) if i+n+n>=10 else "0"+str(i+n+n))}.png) <br/> {len(mesh_LOOP.vertices)} \| {len(mesh_LOOP.faces)} \| {time_str}')
         
-        if i == n-1 : break
-        t1 = time.time()
-        mesh_LOOP = mesh_LOOP.subdivision_LOOP()
-        t2 = time.time()
-        total_time += t2-t1
+    #     if i == n-1 : break
+    #     t1 = time.time()
+    #     mesh_LOOP = mesh_LOOP.subdivision_LOOP()
+    #     t2 = time.time()
+    #     total_time += t2-t1
 
-    for e1, e2, e3 in zip(DS_list, CC_list, LOOP_list):
-        print("|",e1,"|",e2,"|",e3,"|")
+    # for e1, e2, e3 in zip(DS_list, CC_list, LOOP_list):
+    #     print("|",e1,"|",e2,"|",e3,"|")
+
+    mesh = Mesh("cube.off")
+    mesh2 = mesh.subdivision_CC()
+    mesh2.save("cube_smooth.off") 
+
+
+    
+
+

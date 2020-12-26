@@ -34,3 +34,4 @@ below images: number of vertices | number of faces | time to compute
 | ![img](photos/group_photo00_L13.png) <br/> 6144 \| 6146 \| 0.11 s | ![img](photos/group_photo00_L05.png) <br/> 6146 \| 6144 \| 0.13 s | ![img](photos/group_photo00_L21.png) <br/> 6146 \| 12288 \| 0.85 s |
 | ![img](photos/group_photo00_L14.png) <br/> 24576 \| 24578 \| 0.73 s | ![img](photos/group_photo00_L06.png) <br/> 24578 \| 24576 \| 0.92 s | ![img](photos/group_photo00_L22.png) <br/> 24578 \| 49152 \| 2.0 s |
 | ![img](photos/group_photo00_L15.png) <br/> 98304 \| 98306 \| 16.61 s | ![img](photos/group_photo00_L07.png) <br/> 98306 \| 98304 \| 3.24 s | ![img](photos/group_photo00_L23.png) <br/> 98306 \| 196608 \| 5.52 s |
+|![cube](cube_DS.gif)|![cube](cube_CC.gif)|![cube](cube_LOOP.gif)|
