@@ -339,6 +339,7 @@ class Mesh:
         return Mesh(vertices=new_vertices, faces=new_faces)
 
     def subdivision_PR(self):
+        counter = itertools.count()
         new_vertices = []
         new_faces = []
         done_vertices = set()
@@ -352,6 +353,7 @@ class Mesh:
             for m in face_midpoints:
                 m_coords = (m.x, m.y, m.z)
                 if m_coords not in added_vertices:
+                    m.id = next(counter)
                     added_vertices[m_coords] = m.id
                     new_vertices.append(m)
                 else:
@@ -365,6 +367,7 @@ class Mesh:
                     for m in midpoints:
                         m_coords = (m.x, m.y, m.z)
                         if m_coords not in added_vertices:
+                            m.id = next(counter)
                             added_vertices[m_coords] = m.id
                             new_vertices.append(m)
                         else:
@@ -486,10 +489,10 @@ if __name__ == "__main__":
     # for e1, e2, e3 in zip(DS_list, CC_list, LOOP_list):
     #     print("|",e1,"|",e2,"|",e3,"|")
 
-    mesh = Mesh(filename = "cube.off")
+    mesh = Mesh(filename = "cube2.off")
     mesh2 = mesh.subdivision_PR()
     #print(mesh2)
-    mesh2.save("cube2.off") 
+    mesh2.save("cube3.off") 
 
 
     
