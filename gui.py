@@ -2,6 +2,7 @@ from tkinter import *
 from tkinter import filedialog
 from tkinter.font import Font
 from tkinter import messagebox
+from tkinter import ttk
 import utils 
 import mesh
 
@@ -15,7 +16,6 @@ class State:
         self.info_frame = Frame(self.app, background=utils.dark_blue)
 
         self.app.title('Subdivision')
-        #self.app.iconbitmap('img/sudoku.ico')
         self.app.geometry(str(utils.window_width) + "x" + str(utils.window_height))
 
         Label(self.app, text="Enter your output filename:", bg=utils.dark_blue, fg=utils.white).pack()
@@ -26,13 +26,13 @@ class State:
         self.input_button.pack(pady = 10)
 
         Label(self.app, text="Choose number of iterations:", bg=utils.dark_blue, fg=utils.white).pack()
-        self.interations_count_entry = Entry(self.app)
-        self.interations_count_entry.pack()
+        self.iterations_count_entry = Spinbox(self.app, from_ = 1, to = 10) #Entry(self.app)
+        self.iterations_count_entry.pack(pady = 10)
 
-        self.algorithm_name = StringVar(self.app)
-        self.algorithm_name.set("CathmulClark") # default value
-        algorithm_menu = OptionMenu(self.app, self.algorithm_name, "CathmulClark", "DooSabin", "Loop")
-        algorithm_menu.pack(pady = 10)
+        Label(self.app, text="Choose algorithm:", bg=utils.dark_blue, fg=utils.white).pack()
+        self.algorithm_menu = ttk.Combobox(self.app, value = utils.algorithm_names)
+        self.algorithm_menu.current(0)
+        self.algorithm_menu.pack(pady = 10)
         run_button = Button(self.app, text ="Run subdivision", command = self.run_subdivision)
 
         run_button.pack(pady = 10)
@@ -46,10 +46,11 @@ class State:
         self.filename_input = filedialog.askopenfilename(title="Select File",  filetypes=(("text", ".off"), ("all files", "*.*")))
 
     def run_subdivision(self):
-        iterations_count = utils.validate_int(self.interations_count_entry.get())
+        iterations_count = utils.validate_int(self.iterations_count_entry.get())
         self.filename_output = utils.validate_filename(self.text_box.get())
-        if not iterations_count or not self.filename_output or not self.filename_input: return None
-        mesh.subdivision(self.filename_input, self.filename_output, iterations_count, self.algorithm_name)
+        if not self.filename_input: messagebox.showinfo("Input file!", "Please specify your input file!") 
+        if not iterations_count or not self.filename_output: return None
+        mesh.subdivision(self.filename_input, self.filename_output, iterations_count, self.algorithm_menu.get())
         messagebox.showinfo("Success!", "Your mesh has been saved!")
 
     
