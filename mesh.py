@@ -36,6 +36,9 @@ class Vertex:
     def __truediv__(self, num):
         return self * (1/num)
 
+    def midpoint(self, other):
+        return (self + other) * 1/2
+
     def repair_faces_order(self):
         if self.faces == []: return
 
@@ -87,6 +90,7 @@ class Face:
         if self.vertices:
             self.center = Vertex(sum([v.x for v in self.vertices]), sum([v.y for v in self.vertices]), sum([v.z for v in self.vertices])) * (1/len(self.vertices))
         self.inside_points = {}
+        self.midpoints = {}
         self.neighbours = []
 
     def __str__(self): return "[" + " ".join(list(map(lambda v: str(v.id), self.vertices))) + "]"
@@ -111,6 +115,16 @@ class Face:
             result = {v: (v * ratio + self.center * (1 - ratio)) for v in self.vertices}
             self.inside_points = result
             return result
+
+    def get_midpoints(self):
+        if self.midpoints != {}:
+            return self.midpoints
+        else:
+            result = {(v1, v2): v1.midpoint(v2) for v1,v2 in zip(self.vertices, self.vertices[1:] + self.vertices[:1])}
+            self.midpoints = result
+            return result
+
+
 
     def get_neighbour(self, v1, v2):
         for neighbour in self.get_neighbours():
@@ -324,6 +338,43 @@ class Mesh:
         new_vertices = sorted(new_vertices, key=lambda v: v.x)
         return Mesh(vertices=new_vertices, faces=new_faces)
 
+    def subdivision_PR(self):
+        new_vertices = []
+        new_faces = []
+        done_vertices = set()
+        added_vertices = {}
+
+        old_vertices = copy.copy(self.vertices)
+        old_faces = copy.copy(self.faces)
+
+        for face in old_faces:
+            face_midpoints = list(face.get_midpoints().values())
+            for m in face_midpoints:
+                m_coords = (m.x, m.y, m.z)
+                if m_coords not in added_vertices:
+                    added_vertices[m_coords] = m.id
+                    new_vertices.append(m)
+                else:
+                    m.id = added_vertices[m_coords]
+            new_faces.append(Face(face_midpoints))
+            for v in face.vertices:
+                if v not in done_vertices:
+                    done_vertices.add(v)
+                    neighbours = v.get_neighbours()
+                    midpoints = [v.midpoint(v_n) for v_n in neighbours]
+                    for m in midpoints:
+                        m_coords = (m.x, m.y, m.z)
+                        if m_coords not in added_vertices:
+                            added_vertices[m_coords] = m.id
+                            new_vertices.append(m)
+                        else:
+                            m.id = added_vertices[m_coords]
+                    new_faces.append(Face(midpoints)) 
+
+        return Mesh(vertices=new_vertices, faces=new_faces)
+
+    def subdivision_mixed(self):
+        return self.subdivision_CC() if random.randint(0,1) == 0 else self.subdivision_DS()
         
 
 if __name__ == "__main__":
@@ -435,9 +486,10 @@ if __name__ == "__main__":
     # for e1, e2, e3 in zip(DS_list, CC_list, LOOP_list):
     #     print("|",e1,"|",e2,"|",e3,"|")
 
-    mesh = Mesh("cube.off")
-    mesh2 = mesh.subdivision_CC()
-    mesh2.save("cube_smooth.off") 
+    mesh = Mesh(filename = "cube.off")
+    mesh2 = mesh.subdivision_PR()
+    #print(mesh2)
+    mesh2.save("cube2.off") 
 
 
     
