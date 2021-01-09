@@ -378,6 +378,20 @@ class Mesh:
 
     def subdivision_mixed(self):
         return self.subdivision_CC() if random.randint(0,1) == 0 else self.subdivision_DS()
+
+
+def choose_subdivision_algorithm(string_name):
+    if string_name == "CathmulClark": return lambda m: m.subdivision_CC()
+    if string_name == "DooSabin": return lambda m: m.subdivision_DS()
+    if string_name == "Loop": return lambda m: m.subdivision_LOOP()
+    return lambda m: m.subdivision_CC()
+
+def subdivision(filename_input, filename_output, iterations_count, algorithm_name):
+    subdivision_algorithm = choose_subdivision_algorithm(algorithm_name)
+    mesh = Mesh(filename = filename_input)
+    for i in range(iterations_count):
+        mesh = subdivision_algorithm(mesh)
+    mesh.save(filename_output)
         
 
 if __name__ == "__main__":

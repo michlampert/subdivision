@@ -3,7 +3,7 @@ from tkinter import filedialog
 from tkinter.font import Font
 from tkinter import messagebox
 import utils 
-from mesh import Mesh
+import mesh
 
 class State:
     def __init__(self):
@@ -17,16 +17,24 @@ class State:
         self.app.title('Subdivision')
         #self.app.iconbitmap('img/sudoku.ico')
         self.app.geometry(str(utils.window_width) + "x" + str(utils.window_height))
-        #self.place(True)
+
         Label(self.app, text="Enter your output filename:", bg=utils.dark_blue, fg=utils.white).pack()
         self.text_box = Entry(self.app)
         self.text_box.pack(pady = 10)
+
         self.input_button = Button(self.app, text ="Choose input file:", command = self.import_mesh_from_file)
         self.input_button.pack(pady = 10)
+
         Label(self.app, text="Choose number of iterations:", bg=utils.dark_blue, fg=utils.white).pack()
         self.interations_count_entry = Entry(self.app)
         self.interations_count_entry.pack()
-        run_button = Button(self.app, text ="run", command = self.run_subdivision)
+
+        self.algorithm_name = StringVar(self.app)
+        self.algorithm_name.set("CathmulClark") # default value
+        algorithm_menu = OptionMenu(self.app, self.algorithm_name, "CathmulClark", "DooSabin", "Loop")
+        algorithm_menu.pack(pady = 10)
+        run_button = Button(self.app, text ="Run subdivision", command = self.run_subdivision)
+
         run_button.pack(pady = 10)
 
     def actualize_font(self):
@@ -41,9 +49,7 @@ class State:
         iterations_count = utils.validate_int(self.interations_count_entry.get())
         self.filename_output = utils.validate_filename(self.text_box.get())
         if not iterations_count or not self.filename_output or not self.filename_input: return None
-        mesh = Mesh(filename = self.filename_input)
-        mesh2 = mesh.subdivision_PR()
-        mesh2.save(self.filename_output)
+        mesh.subdivision(self.filename_input, self.filename_output, iterations_count, self.algorithm_name)
         messagebox.showinfo("Success!", "Your mesh has been saved!")
 
     
