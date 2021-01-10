@@ -124,13 +124,16 @@ class Face:
             self.midpoints = result
             return result
 
-
-
     def get_neighbour(self, v1, v2):
         for neighbour in self.get_neighbours():
             if v1 in neighbour.vertices and v2 in neighbour.vertices:
                 return neighbour
         return None
+
+    def get_edge(self, other):
+        # print(self, other)
+        # print(*tuple(set(self.vertices).intersection(other.vertices)))
+        return tuple(set(self.vertices).intersection(other.vertices))
 
 class Mesh:
     def __init__(self, *, vertices = None, faces = None, filename = None, triangular=False):
@@ -284,7 +287,6 @@ class Mesh:
 
         for i, v in enumerate(new_vertices): v.id = i
 
-        new_vertices = sorted(new_vertices, key=lambda v: v.x)
         return Mesh(vertices=new_vertices, faces=new_faces)
 
     def subdivision_LOOP(self):
@@ -335,46 +337,72 @@ class Mesh:
 
         for i, v in enumerate(new_vertices): v.id = i
 
-        new_vertices = sorted(new_vertices, key=lambda v: v.x)
         return Mesh(vertices=new_vertices, faces=new_faces)
 
     def subdivision_PR(self):
-        counter = itertools.count()
+        # counter = itertools.count()
+        # new_vertices = []
+        # new_faces = []
+        # done_vertices = set()
+        # added_vertices = {}
+
+        # old_vertices = copy.copy(self.vertices)
+        # old_faces = copy.copy(self.faces)
+
+        # for face in old_faces:
+        #     face_midpoints = list(face.get_midpoints().values())
+        #     for m in face_midpoints:
+        #         m_coords = (m.x, m.y, m.z)
+        #         if m_coords not in added_vertices:
+        #             m.id = next(counter)
+        #             added_vertices[m_coords] = m.id
+        #             new_vertices.append(m)
+        #         else:
+        #             m.id = added_vertices[m_coords]
+        #     new_faces.append(Face(face_midpoints))
+        #     for v in face.vertices:
+        #         if v not in done_vertices:
+        #             done_vertices.add(v)
+        #             neighbours = v.get_neighbours()
+        #             midpoints = [v.midpoint(v_n) for v_n in neighbours]
+        #             for m in midpoints:
+        #                 m_coords = (m.x, m.y, m.z)
+        #                 if m_coords not in added_vertices:
+        #                     m.id = next(counter)
+        #                     added_vertices[m_coords] = m.id
+        #                     new_vertices.append(m)
+        #                 else:
+        #                     m.id = added_vertices[m_coords]
+        #             new_faces.append(Face(midpoints)) 
+
+        # return Mesh(vertices=new_vertices, faces=new_faces)
+
+        edge_points = {}
         new_vertices = []
         new_faces = []
-        done_vertices = set()
-        added_vertices = {}
 
-        old_vertices = copy.copy(self.vertices)
-        old_faces = copy.copy(self.faces)
+        for face in self.faces:
+            for v1, v2 in zip(face.vertices, face.vertices[1:] + face.vertices[:1]):
+                if (v1, v2) in edge_points.keys() or (v2, v1) in edge_points.keys(): continue
+                v = (v1 + v2)/2
+                edge_points[(v1,v2)] = v
+                new_vertices.append(v)
 
-        for face in old_faces:
-            face_midpoints = list(face.get_midpoints().values())
-            for m in face_midpoints:
-                m_coords = (m.x, m.y, m.z)
-                if m_coords not in added_vertices:
-                    m.id = next(counter)
-                    added_vertices[m_coords] = m.id
-                    new_vertices.append(m)
-                else:
-                    m.id = added_vertices[m_coords]
-            new_faces.append(Face(face_midpoints))
-            for v in face.vertices:
-                if v not in done_vertices:
-                    done_vertices.add(v)
-                    neighbours = v.get_neighbours()
-                    midpoints = [v.midpoint(v_n) for v_n in neighbours]
-                    for m in midpoints:
-                        m_coords = (m.x, m.y, m.z)
-                        if m_coords not in added_vertices:
-                            m.id = next(counter)
-                            added_vertices[m_coords] = m.id
-                            new_vertices.append(m)
-                        else:
-                            m.id = added_vertices[m_coords]
-                    new_faces.append(Face(midpoints)) 
+        for face in self.faces:
+            new_faces.append(Face([edge_points.get((v1,v2), None) or edge_points.get((v2,v1), None) for v1,v2 in zip(face.vertices, face.vertices[1:] + face.vertices[:1])]))
+        
+        for v in self.vertices:
+            v.repair_faces_order()
+            tmp = []
+            for face1, face2 in zip(v.faces, v.faces[1:] + v.faces[:1]):
+                v1, v2 = face1.get_edge(face2)
+                tmp.append(edge_points.get((v1,v2), None) or edge_points.get((v2,v1), None))
+            new_faces.append(Face(tmp))
+
+        for i, v in enumerate(new_vertices): v.id = i
 
         return Mesh(vertices=new_vertices, faces=new_faces)
+
 
     def subdivision_mixed(self):
         return self.subdivision_CC() if random.randint(0,1) == 0 else self.subdivision_DS()
@@ -503,10 +531,9 @@ if __name__ == "__main__":
     # for e1, e2, e3 in zip(DS_list, CC_list, LOOP_list):
     #     print("|",e1,"|",e2,"|",e3,"|")
 
-    mesh = Mesh(filename = "cube2.off")
-    mesh2 = mesh.subdivision_PR()
-    #print(mesh2)
-    mesh2.save("cube3.off") 
+    mesh = Mesh(filename = "cube.off")
+    mesh2 = mesh.subdivision_PR().subdivision_PR().subdivision_PR()
+    mesh2.save("cube_3.off") 
 
 
     
