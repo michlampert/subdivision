@@ -4,3 +4,4 @@ all_meshes/
 meshes/
 bad_face.off
 cube_*.off
+__init__.py
