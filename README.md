@@ -7,8 +7,6 @@
 - [x] Loop
 - [x] Peters-Reif
 
-<div style="display:flex"><p style="transform-origin: top left; transform:rotate(-10deg); color: red"> <b>NEW</b> </p> now with gui</div>
-
 ## 1. Step by step effect of Catmull-Clark algorithm
 ![suzanne](suzanne_CC.gif)
 
