@@ -42,7 +42,7 @@ class Vertex:
     def repair_faces_order(self):
         if self.faces == []: return
 
-        if len(self.faces) != len(list(set(self.faces))): raise Exception("Bad structure detected")
+        if len(self.faces) != len(list(set(self.faces))): raise Exception("Bad structure detected (mesh probably has redundant faces)")
 
         faces = copy.copy(self.faces)
         result = [faces.pop(0)]
@@ -64,8 +64,7 @@ class Vertex:
                     return
                 if next(counter) == 1000:
                     print(*self.faces)
-                    raise Exception("Bad structure detected in vertex:")
-
+                    raise Exception(f"Bad structure detected (faces around vertex {self} aren't consistent)")
 
         self.faces = result
 
@@ -108,11 +107,13 @@ class Face:
             self.neighbours = result
             return result
 
-    def get_inside_points(self, ratio = 0.5):
+    def get_inside_points(self):
         if self.inside_points != {}:
             return self.inside_points
         else:
-            result = {v: (v * ratio + self.center * (1 - ratio)) for v in self.vertices}
+            result = {}
+            for v1, v2, v3 in zip(self.vertices, self.vertices[1:] + self.vertices[:1], self.vertices[2:] + self.vertices[:2]):
+                result[v2] = ((v1+v3)/2 + v2 * 2 + self.center)/4
             self.inside_points = result
             return result
 
@@ -131,8 +132,6 @@ class Face:
         return None
 
     def get_edge(self, other):
-        # print(self, other)
-        # print(*tuple(set(self.vertices).intersection(other.vertices)))
         return tuple(set(self.vertices).intersection(other.vertices))
 
 class Mesh:
@@ -209,8 +208,8 @@ class Mesh:
         for i, face in enumerate(self.faces):
             Mesh(vertices=face.vertices, faces=[face]).save(f"tmp/face{i}.off")
 
-    def subdivision_DS(self, ratio = 0.5):
-        new_vertices = sum([list(face.get_inside_points(ratio).values()) for face in self.faces],[])
+    def subdivision_DS(self):
+        new_vertices = sum([list(face.get_inside_points().values()) for face in self.faces],[])
         counter = itertools.count()
         for v in new_vertices: v.id = next(counter)
         
@@ -340,42 +339,6 @@ class Mesh:
         return Mesh(vertices=new_vertices, faces=new_faces)
 
     def subdivision_PR(self):
-        # counter = itertools.count()
-        # new_vertices = []
-        # new_faces = []
-        # done_vertices = set()
-        # added_vertices = {}
-
-        # old_vertices = copy.copy(self.vertices)
-        # old_faces = copy.copy(self.faces)
-
-        # for face in old_faces:
-        #     face_midpoints = list(face.get_midpoints().values())
-        #     for m in face_midpoints:
-        #         m_coords = (m.x, m.y, m.z)
-        #         if m_coords not in added_vertices:
-        #             m.id = next(counter)
-        #             added_vertices[m_coords] = m.id
-        #             new_vertices.append(m)
-        #         else:
-        #             m.id = added_vertices[m_coords]
-        #     new_faces.append(Face(face_midpoints))
-        #     for v in face.vertices:
-        #         if v not in done_vertices:
-        #             done_vertices.add(v)
-        #             neighbours = v.get_neighbours()
-        #             midpoints = [v.midpoint(v_n) for v_n in neighbours]
-        #             for m in midpoints:
-        #                 m_coords = (m.x, m.y, m.z)
-        #                 if m_coords not in added_vertices:
-        #                     m.id = next(counter)
-        #                     added_vertices[m_coords] = m.id
-        #                     new_vertices.append(m)
-        #                 else:
-        #                     m.id = added_vertices[m_coords]
-        #             new_faces.append(Face(midpoints)) 
-
-        # return Mesh(vertices=new_vertices, faces=new_faces)
 
         edge_points = {}
         new_vertices = []
@@ -532,8 +495,8 @@ if __name__ == "__main__":
     #     print("|",e1,"|",e2,"|",e3,"|")
 
     mesh = Mesh(filename = "cube.off")
-    mesh2 = mesh.subdivision_PR().subdivision_PR().subdivision_PR()
-    mesh2.save("cube_3.off") 
+    mesh2 = mesh.subdivision_DS().subdivision_DS()
+    mesh2.save("cube_6.off") 
 
 
     
