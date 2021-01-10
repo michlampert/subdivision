@@ -17,7 +17,7 @@ class Vertex:
     def copy(self, id=None):
         return Vertex(self.x, self.y, self.z, [], id)
 
-    def __str__(self): return f"{self.id}:({round(self.x,2)},{round(self.y,2)},{round(self.z,2)})"
+    def __str__(self): return f"{self.id-1}:({round(self.x,2)},{round(self.y,2)},{round(self.z,2)})"
 
     def dist(self, other): return ((self.x - other.x)**2 + (self.y - other.y)**2 + (self.z - other.z)**2)**(1/2)
 
@@ -42,7 +42,10 @@ class Vertex:
     def repair_faces_order(self):
         if self.faces == []: return
 
-        if len(self.faces) != len(list(set(self.faces))): raise Exception("Bad structure detected (mesh probably has redundant faces)")
+        if len(self.faces) != len(list(set(self.faces))):
+            print(self)
+            print(*self.faces)
+            raise Exception("Bad structure detected (mesh probably have redundant faces)")
 
         faces = copy.copy(self.faces)
         result = [faces.pop(0)]
@@ -84,6 +87,9 @@ class Vertex:
 class Face:
     def __init__(self, vertices = None):
         self.vertices = vertices if vertices else []
+        for v in self.vertices:
+            if self.vertices.count(v)>1:
+                self.vertices.remove(v)
         for v in self.vertices:
             v.faces.append(self)
         if self.vertices:
@@ -132,7 +138,9 @@ class Face:
         return None
 
     def get_edge(self, other):
-        return tuple(set(self.vertices).intersection(other.vertices))
+        result = tuple(set(self.vertices).intersection(other.vertices))
+        if len(result) > 2: raise Exception(f"{self} and {other} faces are invalid. Look at common vertices:\n{[str(v) for v in result]}")
+        return result[:2]
 
 class Mesh:
     def __init__(self, *, vertices = None, faces = None, filename = None, triangular=False):
@@ -184,9 +192,14 @@ class Mesh:
                 # for v in vs: vertices[v].faces.append(f)
 
             self.vertices += vertices.values()
-        
-        # self.vertices = list(filter(lambda v: len(v.faces) > 0, self.vertices))
-        # self.faces = list(filter(lambda f: len(f.vertices) > 0, self.faces))
+        tmp = []
+        for face in self.faces:
+            if len(list(set(face.vertices))) < 3:
+                for v in face.vertices:
+                    v.faces.remove(face)
+            else: tmp.append(face)
+        self.faces = tmp
+        self.vertices = list(filter(lambda v: len(v.faces) > 0, self.vertices))
 
 
     def __str__(self):
@@ -355,11 +368,39 @@ class Mesh:
             new_faces.append(Face([edge_points.get((v1,v2), None) or edge_points.get((v2,v1), None) for v1,v2 in zip(face.vertices, face.vertices[1:] + face.vertices[:1])]))
         
         for v in self.vertices:
+            if len(list(set(v.faces))) < 2: continue
             v.repair_faces_order()
+            
+            # vvv
+            # in case faces around vertex are not consistent
+            # ^^^
+            first_face = v.faces[0]
+            last_face = v.faces[-1]
+            fi = first_face.vertices.index(v)
+            li = last_face.vertices.index(v)
+            f1,f2 = first_face.vertices[(fi - 1) % len(first_face.vertices)], first_face.vertices[(fi + 1) % len(first_face.vertices)]
+            l1,l2 = last_face.vertices[(li - 1) % len(last_face.vertices)], last_face.vertices[(li + 1) % len(last_face.vertices)]
+
             tmp = []
+            vertices = set()
             for face1, face2 in zip(v.faces, v.faces[1:] + v.faces[:1]):
-                v1, v2 = face1.get_edge(face2)
-                tmp.append(edge_points.get((v1,v2), None) or edge_points.get((v2,v1), None))
+                try:
+                    v1, v2 = face1.get_edge(face2)
+                    tmp.append(edge_points.get((v1,v2), None) or edge_points.get((v2,v1), None))
+                    vertices.add(v1)
+                    vertices.add(v2)
+                except:
+                    print(f"Warning: mesh is not consistent in around vertex {v}")
+
+            if f1 not in vertices:
+                tmp = [(edge_points.get((v,f1), None) or edge_points.get((f1,v), None))] + tmp
+            elif f2 not in vertices:
+                tmp = [(edge_points.get((v,f2), None) or edge_points.get((f2,v), None))] + tmp
+            if l1 not in vertices:
+                tmp.append(edge_points.get((v,l1), None) or edge_points.get((l1,v), None))
+            elif l2 not in vertices:
+                tmp.append(edge_points.get((v,l2), None) or edge_points.get((l2,v), None))
+
             new_faces.append(Face(tmp))
 
         for i, v in enumerate(new_vertices): v.id = i
@@ -433,10 +474,12 @@ if __name__ == "__main__":
     # mesh_DS = Mesh(filename = "suzanne.off")
     # mesh_CC = Mesh(filename = "suzanne.off")
     # mesh_LOOP = Mesh(filename = "suzanne.off", triangular=True)
+    # mesh_PR = Mesh(filename = "suzanne.off")
 
     # DS_list = []
     # CC_list = []
     # LOOP_list = []
+    # PR_list = []
 
     # n = 6
 
@@ -449,7 +492,7 @@ if __name__ == "__main__":
     #     elif total_time < 0.1:
     #         time_str = str(round(total_time * 1000, 2)) + " ms"
     #     else: time_str = str(round(total_time, 2)) + " s"
-    #     DS_list.append(f'![img](photos/group_photo01_L{(str(i+n) if i+n>=10 else "0"+str(i+n))}.png) <br/> {len(mesh_DS.vertices)} \| {len(mesh_DS.faces)} \| {time_str}')
+    #     DS_list.append(f'![img](photos/group_photo00_L{(str(i+n) if i+n>=10 else "0"+str(i+n))}.png) <br/> {len(mesh_DS.vertices)} \| {len(mesh_DS.faces)} \| {time_str}')
         
     #     if i == n-1 : break
     #     t1 = time.time()
@@ -466,7 +509,7 @@ if __name__ == "__main__":
     #     elif total_time < 0.1:
     #         time_str = str(round(total_time * 1000, 2)) + " ms"
     #     else: time_str = str(round(total_time, 2)) + " s"
-    #     CC_list.append(f'![img](photos/group_photo01_L{(str(i) if i>=10 else "0"+str(i))}.png) <br/> {len(mesh_CC.vertices)} \| {len(mesh_CC.faces)} \| {time_str}')
+    #     CC_list.append(f'![img](photos/group_photo00_L{(str(i) if i>=10 else "0"+str(i))}.png) <br/> {len(mesh_CC.vertices)} \| {len(mesh_CC.faces)} \| {time_str}')
         
     #     if i == n-1 : break
     #     t1 = time.time()
@@ -483,7 +526,7 @@ if __name__ == "__main__":
     #     elif total_time < 0.1:
     #         time_str = str(round(total_time * 1000, 2)) + " ms"
     #     else: time_str = str(round(total_time, 2)) + " s"
-    #     LOOP_list.append(f'![img](photos/group_photo01_L{(str(i+n+n) if i+n+n>=10 else "0"+str(i+n+n))}.png) <br/> {len(mesh_LOOP.vertices)} \| {len(mesh_LOOP.faces)} \| {time_str}')
+    #     LOOP_list.append(f'![img](photos/group_photo00_L{(str(i+n+n) if i+n+n>=10 else "0"+str(i+n+n))}.png) <br/> {len(mesh_LOOP.vertices)} \| {len(mesh_LOOP.faces)} \| {time_str}')
         
     #     if i == n-1 : break
     #     t1 = time.time()
@@ -491,14 +534,35 @@ if __name__ == "__main__":
     #     t2 = time.time()
     #     total_time += t2-t1
 
-    # for e1, e2, e3 in zip(DS_list, CC_list, LOOP_list):
-    #     print("|",e1,"|",e2,"|",e3,"|")
+    
+    # total_time = 0
+    # for i in range(2*n-1):
+    #     mesh_PR.save(f"cube_PR{i}.off")
 
-    mesh = Mesh(filename = "cube.off")
-    mesh2 = mesh.subdivision_DS().subdivision_DS()
-    mesh2.save("cube_6.off") 
+    #     if total_time < 0.001:
+    #         time_str = str(round(total_time * 1000, 5)) + " ms"
+    #     elif total_time < 0.1:
+    #         time_str = str(round(total_time * 1000, 2)) + " ms"
+    #     else: time_str = str(round(total_time, 2)) + " s"
+    #     PR_list.append(f'![img](photos/group_photo00_L{(str(i+n+n+n) if i+n+n+n>=10 else "0"+str(i+n+n+n))}.png) <br/> {len(mesh_PR.vertices)} \| {len(mesh_PR.faces)} \| {time_str}')
+        
+    #     if i == 2*n-2 : break
+    #     t1 = time.time()
+    #     mesh_PR = mesh_PR.subdivision_PR()
+    #     t2 = time.time()
+    #     total_time += t2-t1
 
+    # DS_list += [" "]*(n-1)
+    # CC_list += [" "]*(n-1)
+    # LOOP_list += [" "]*(n-1)
+    # for e1, e2, e3, e4 in zip(DS_list, CC_list, LOOP_list, PR_list):
+    #     print("|",e1,"|",e2,"|",e3,"|", e4, "|")
 
+    mesh = Mesh(filename="cube_PR0.off")
+    mesh = mesh.subdivision_PR()
+    mesh.save("suzanne2.off")
+    mesh = mesh.subdivision_PR()
+    mesh.save("suzanne3.off")
     
 
 
